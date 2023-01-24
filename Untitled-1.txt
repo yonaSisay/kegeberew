@@ -1,0 +1,13 @@
+time                   Task                                        Place                        Accomplished
+12:00 - 1:00 start ur day by workout              Dorm                          NOT
+1:00-2:00 TNT study                                       Dorm                          NOT
+2:30-4:00 A2SV problem solving                    Library or Dorm          Half done
+4:00 - 6:00 church youtube                            Library or Dorm           NOTE
+6:00 - 7:00 cafe and chilout                                                                 done
+7:00 - 8:00 deep sleep                          
+9:00 - 10:00 A2SV problem solving                  Library or Dorm          not deone
+10:00 - 12:00 wordpress church                       Library or Dorm          half not done
+12:00 - 1:00 cafe and chilout                                                               done
+1:00 - 4:00 IETP project                                     Library or Dorm           done
+
+jan 21,2023 20%
