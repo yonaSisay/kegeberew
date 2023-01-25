@@ -40,6 +40,11 @@ const userSchema = mongoose.Schema({
         },
         required:true
     },
+    balance:{
+      type:Number,
+      min: [0, 'your balance must be greate than or equal to 0'],
+      default:0
+    },
     password: {
         type: String,
         required: true

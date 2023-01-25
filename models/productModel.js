@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   name: {
@@ -53,7 +54,7 @@ const productSchema = new mongoose.Schema({
     required: [true,"a product must have price"],
     min: [0, 'price should be greater than or equal to 0']
   }
-});
+},{timestamps:true});
 
 productSchema.methods.daysRemaining = function() {
   const today = new Date();
