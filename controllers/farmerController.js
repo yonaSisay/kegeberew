@@ -32,11 +32,13 @@ exports.resizeProductPhoto = (req, res, next) => {
 
 exports.createProduct = catchAsync(async (req, res, next) => {   
     if (req.file) req.body.image = req.file.filename
+    if (req.body.active) delete req.body.active
     const newProduct = await Product.create(req.body);
     res.status(201).json({
     status: 'success',
     data: {
-        product: newProduct
+        product: newProduct,
+        message:"your request to sell this product to the market is sent to the will will respond in 24 hours"
     }
     });
 });
@@ -60,6 +62,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
       return next(new AppError('You are not allowed to update this product', 403));
     }
     if (req.file) req.body.image = req.file.filename
+    if (req.body.active) delete req.body.active
     product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true

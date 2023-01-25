@@ -44,7 +44,7 @@ const productSchema = new mongoose.Schema({
       return this.totalAmount
     }
   },
-  isActive: {
+  active: {
     type: Boolean,
     default:false
   },
