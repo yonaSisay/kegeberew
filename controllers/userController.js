@@ -50,6 +50,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
     
     if (req.file) req.body.image = req.file.filename
     
+    
     // Update user
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,

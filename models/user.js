@@ -63,6 +63,10 @@ const userSchema = mongoose.Schema({
       type: String,
       default:'default.png'
     },
+    money:{
+      type:Number,
+      default:0
+    },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,

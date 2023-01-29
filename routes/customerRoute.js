@@ -9,3 +9,4 @@ router
 router
     .route('/:id')
     .get(custController.getProduct)
+module.exports = router

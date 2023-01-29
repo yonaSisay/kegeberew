@@ -13,9 +13,9 @@ exports.DeactiveProducts = catchAsync(async (req, res, next) => {
     if (req.query.search) {
         query.name = new RegExp(req.query.search, "i");
     }
-    if (req.query.farmerName) {
+    if (req.query.farmer) {
         // Find the farmer with the specified name
-        const farmer = await User.findOne({ fullName: req.query.farmerName });
+        const farmer = await User.findOne({ firstName: req.query.farmer });
         if (!farmer) return next(new AppError('No farmer found with that name', 404));
         // Use the farmer's _id to query the product collection
         query.farmer = farmer._id;
@@ -39,8 +39,7 @@ exports.DeactiveProducts = catchAsync(async (req, res, next) => {
 
 
 exports.updateProduct = catchAsync(async (req, res, next) => {
-    const product = await Product.findById(req.params.id);
-    product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
     });
@@ -51,7 +50,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
       }
     });
 });
-
+//  write the product route
 exports.getProduct = catchAsync(async (req,res,next)=>{
     const product = await Product.findById(req.params.id);
     res.status(200).json({
@@ -61,3 +60,5 @@ exports.getProduct = catchAsync(async (req,res,next)=>{
         }
     })
 })
+
+

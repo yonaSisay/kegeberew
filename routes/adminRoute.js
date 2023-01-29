@@ -11,3 +11,4 @@ router
     .get(authController.protect,authController.restrictTo('admin'),adminController.getProduct)
     .patch(authController.protect,authController.restrictTo('admin'),adminController.updateProduct)
     
+module.exports = router

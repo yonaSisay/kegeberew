@@ -2,14 +2,16 @@ const express = require("express")
 const morgan = require("morgan")
 const globalErrorHandler = require('./controllers/errorController')
 const AppError = require('./utils/appError');
-const productRouter = require('./routes/productRoute')
-const userRouter = require('./routes/authRoute')
+const authRoute = require('./routes/authRoute')
+const farmerRoute = require('./routes/farmerRoute')
+const customerRoute = require('./routes/customerRoute')
+const adminRoute = require('./routes/adminRoute')
 
 const app = express()
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
   }
-
+ 
 app.use(express.json())
 
 // express static page
@@ -24,8 +26,10 @@ app.use((req, res, next) => {
     next();
   });
 // Routes
-app.use('/products',productRouter)
-app.use('/user',userRouter)
+app.use('/user',authRoute)
+app.use('/admin',adminRoute)
+app.use('/farmer',farmerRoute)
+app.use('/customer',customerRoute)
 app.all('*',(req,res,next) =>{
     next(new AppError(`Can't find ${req.originalUrl} on this server!`,404));
   });

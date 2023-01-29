@@ -14,11 +14,11 @@ const productSchema = new mongoose.Schema({
     required: [true,"a product must have type"]
   },
   plantedDate: {
-    type: Date,
+    type: String,
     required: [true,"you must specify the planted date"]
   },
   harvestingDate: {
-    type: Date,
+    type: String,
     required: [true, "you must specify the harvesting date"]
   },
   location: {
@@ -28,7 +28,7 @@ const productSchema = new mongoose.Schema({
   productDescription: {
     type: String
   },
-  ownerId: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User",
     required: [true,"a product must have owner"]
@@ -38,13 +38,6 @@ const productSchema = new mongoose.Schema({
     required: [true,"a product must have total amount"],
     min: [0, 'totalAmount should be greater than or equal to 0']
   },
-  remainingAmount: {
-    type: Number,
-    min: [0, 'remainingAmount should be greater than or equal to 0'],
-    default: function () {
-      return this.totalAmount
-    }
-  },
   active: {
     type: Boolean,
     default:false
@@ -53,16 +46,20 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: [true,"a product must have price"],
     min: [0, 'price should be greater than or equal to 0']
+  },
+  active: {
+    type: Boolean,
+    default:true
   }
 },{timestamps:true});
 
-productSchema.methods.daysRemaining = function() {
-  const today = new Date();
-  const harvestingDate = new Date(this.harvestingDate);
-  const diffInTime = harvestingDate.getTime() - today.getTime();
-  const diffInDays = diffInTime / (1000 * 3600 * 24);
-  return Math.ceil(diffInDays);
-};
+// productSchema.methods.daysRemaining = function() {
+//   const today = new Date();
+//   const harvestingDate = new Date(this.harvestingDate);
+//   const diffInTime = harvestingDate.getTime() - today.getTime();
+//   const diffInDays = diffInTime / (1000 * 3600 * 24);
+//   return Math.ceil(diffInDays);
+// };
 
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;
