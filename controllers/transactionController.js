@@ -2,7 +2,6 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Product = require("../models/productModel");
 const Transaction = require("../models/transactionModel");
-const Notification = require("../models/notificationModel");
 const User = require("../models/user");
 const Platform = require("../models/platformModel");
 
@@ -69,6 +68,7 @@ exports.myPurchases = catchAsync(async (req, res, next) => {
 exports.updateTransaction = catchAsync(async (req, res, next) => {
 	const transaction = await Transaction.findById(req.params.id);
 
+    // you have to check this code if it works or not
 	if (!transaction)
 		return next(new AppError("No transaction found with that id"));
 	if (

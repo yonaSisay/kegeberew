@@ -36,9 +36,9 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 	if (req.body.active) delete req.body.active;
 	req.body.owner = req.user.id;
 	const newProduct = await Product.create(req.body);
-  const platform = await Platform.findOne({ name: "platform" });
-  platform.totalProducts += 1;
-  await platform.save();
+	const platform = await Platform.findOne({ name: "platform" });
+	platform.totalProducts += 1;
+	await platform.save();
 	res.status(201).json({
 		status: "success",
 		data: {

@@ -5,31 +5,26 @@ const User = require("../models/user");
 const Transaction = require("../models/transactionModel");
 
 exports.getAllTransactions = catchAsync(async (req, res, next) => {
-	// give me filtering options  for the transactions
 	let query = {};
 	if (req.query.status) {
 		query.status = req.query.status;
 	}
-	// Searching
 	if (req.query.search) {
 		query.name = new RegExp(req.query.search, "i");
 	}
 	if (req.query.farmer) {
-		// Find the farmer with the specified name
 		const farmer = await User.findOne({ firstName: req.query.farmer });
 		if (!farmer)
 			return next(new AppError("No farmer found with that name", 404));
-		// Use the farmer's _id to query the product collection
+
 		query.farmer = farmer._id;
 	}
-	//Sorting
 	if (req.query.sortBy) {
 		const parts = req.query.sortBy.split(":");
 		const sortBy = parts[0];
 		const order = parts[1] === "desc" ? -1 : 1;
 		query = query.sort({ [sortBy]: order });
 	}
-
 	const transactions = await Transaction.find(query);
 
 	res.status(200).json({
@@ -103,7 +98,6 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
 	});
 });
 
-//  write the product route
 exports.getProduct = catchAsync(async (req, res, next) => {
 	const product = await Product.findById(req.params.id);
 	res.status(200).json({

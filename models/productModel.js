@@ -14,11 +14,11 @@ const productSchema = new mongoose.Schema({
     required: [true,"a product must have type"]
   },
   plantedDate: {
-    type: String,
+    type: Date,
     required: [true,"you must specify the planted date"]
   },
   harvestingDate: {
-    type: String,
+    type: Date,
     required: [true, "you must specify the harvesting date"]
   },
   location: {
@@ -53,13 +53,13 @@ const productSchema = new mongoose.Schema({
   }
 },{timestamps:true});
 
-// productSchema.methods.daysRemaining = function() {
-//   const today = new Date();
-//   const harvestingDate = new Date(this.harvestingDate);
-//   const diffInTime = harvestingDate.getTime() - today.getTime();
-//   const diffInDays = diffInTime / (1000 * 3600 * 24);
-//   return Math.ceil(diffInDays);
-// };
+productSchema.methods.daysRemaining = function() {
+  const today = new Date();
+  const harvestingDate = new Date(this.harvestingDate);
+  const diffInTime = harvestingDate.getTime() - today.getTime();
+  const diffInDays = diffInTime / (1000 * 3600 * 24);
+  return Math.ceil(diffInDays);
+};
 
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;
