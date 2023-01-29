@@ -10,3 +10,8 @@ exports.createProductCheck = [
   check('totalAmount', 'A product must have a total amount').not().isEmpty(),
   check('price', 'A product must have a price').not().isEmpty()
 ];
+
+exports.buyProductCheck = [
+  check('quantity', 'A transaction must have a quantity').not().isEmpty(),
+  check('totalPrice', 'A transaction must have a total price').not().isEmpty()
+];

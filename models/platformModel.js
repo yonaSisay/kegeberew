@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const platformSchema = new mongoose.Schema({
+    name:{
+        type:String,
+        default:'platform'
+    },
     totalTransaction:{
         type:Number,
         default:0
@@ -24,3 +28,5 @@ const platformSchema = new mongoose.Schema({
 })
 
 const Platform = mongoose.model('Platform', platformSchema);
+
+module.exports = Platform;
