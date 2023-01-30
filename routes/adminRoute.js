@@ -11,18 +11,6 @@ router
 		adminController.DeactiveProducts
 	);
 router
-	.route("/:id")
-	.get(
-		authController.protect,
-		authController.restrictTo("admin"),
-		adminController.getProduct
-	)
-	.patch(
-		authController.protect,
-		authController.restrictTo("admin"),
-		adminController.updateProduct
-	);
-router
 	.route("/transactions")
 	.get(
 		authController.protect,

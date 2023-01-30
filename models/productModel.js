@@ -1,17 +1,9 @@
 
 const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true,"a product must have name"],
-  },
   image: {
     type: String,
     required: [true,"a product must have an image"]
-  },
-  type: {
-    type: String,
-    required: [true,"a product must have type"]
   },
   plantedDate: {
     type: Date,

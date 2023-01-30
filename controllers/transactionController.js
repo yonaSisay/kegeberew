@@ -65,6 +65,18 @@ exports.myPurchases = catchAsync(async (req, res, next) => {
 	});
 });
 
+exports.getOneTransaction = catchAsync(async (req, res, next) => {
+	const transaction = await Transaction.findById(req.params.id);
+	if (!transaction) return next(new AppError("No transaction found"));
+
+	res.status(200).json({
+		status: "success",
+		data:{
+			transaction,
+		},
+	})
+})
+
 exports.updateTransaction = catchAsync(async (req, res, next) => {
 	const transaction = await Transaction.findById(req.params.id);
 
@@ -103,9 +115,7 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
 });
 
 exports.mySales = catchAsync(async (req, res, next) => {
-	const transactions = await Transaction.find({ farmer: req.user._id }).sort({
-		createdAt: -1,
-	});
+	const transactions = await Transaction.find({ farmer: req.user._id })
 	if (!transactions) return next(new AppError("No transactions found"));
 
 	res.status(200).json({

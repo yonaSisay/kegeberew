@@ -6,6 +6,7 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
 	let query = {};
 	if (req.query.search) {
 		query.name = new RegExp(req.query.search, "i");
+		query.active = true;
 	}
 	if (req.query.sortBy) {
 		const parts = req.query.sortBy.split(":");

@@ -25,7 +25,9 @@ exports.getAllTransactions = catchAsync(async (req, res, next) => {
 		const order = parts[1] === "desc" ? -1 : 1;
 		query = query.sort({ [sortBy]: order });
 	}
-	const transactions = await Transaction.find(query);
+	const transactions = await Transaction.find(query)
+		.populate({ path: "farmer", select: "firstName lastName" })
+		.populate({ path: "customer", select: "firstName lastName"});
 
 	res.status(200).json({
 		status: "success",
@@ -54,7 +56,7 @@ exports.getOneTransaction = catchAsync(async (req, res, next) => {
 exports.DeactiveProducts = catchAsync(async (req, res, next) => {
 	let query = {};
 	if (req.query.active) {
-		query.active = req.query.active;
+		query.active = false;
 	}
 	// Searching
 	if (req.query.search) {
@@ -81,19 +83,6 @@ exports.DeactiveProducts = catchAsync(async (req, res, next) => {
 		results: products.length,
 		data: {
 			products,
-		},
-	});
-});
-
-exports.updateProduct = catchAsync(async (req, res, next) => {
-	const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-		new: true,
-		runValidators: true,
-	});
-	res.status(200).json({
-		status: "success",
-		data: {
-			product,
 		},
 	});
 });

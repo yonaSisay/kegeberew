@@ -14,15 +14,6 @@ const userSchema = mongoose.Schema({
         required: [true, "please enter your last name"],
         trim:true
     },
-    email: {
-        type: String,
-        unique: [true, "email already exists in database!"],
-        required: [true, "please enter your email"],
-        match: [
-          /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-          "Please add a valid email"
-        ]
-      },
     phone:{
         type:String,
         unique: [true, "phone number already exists in database!"],
@@ -70,6 +61,7 @@ const userSchema = mongoose.Schema({
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    active: {type: Boolean, default: true, select: true}
 },{
     timestamps:true
 })

@@ -21,19 +21,4 @@ router.get(
 	authController.restrictTo("farmer"),
 	farmerController.listMyProducts
 );
-router
-	.route("/:id")
-	.patch(
-		authController.protect,
-		authController.restrictTo("farmer"),
-		farmerController.uploadProductPhoto,
-		farmerController.resizeProductPhoto,
-		farmerController.updateProduct
-	)
-	.delete(
-		authController.protect,
-		authController.restrictTo("farmer"),
-		farmerController.deleteProduct
-	);
-
 module.exports = router;

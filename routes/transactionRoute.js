@@ -19,6 +19,11 @@ router
 		authController.protect,
 		authController.restrictTo("farmer customer"),
 		transactionController.updateTransaction
+	)
+	.get(
+		authController.protect,
+		authController.restrictTo("farmer customer"),
+		transactionController.getOneTransaction
 	);
 router
 	.route("/farmer")

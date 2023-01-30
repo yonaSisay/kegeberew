@@ -7,13 +7,20 @@ const crypto = require("crypto");
 const { promisify } = require("util");
 const Platform = require("../models/platformModel");
 
+const {AUTH_TOKEN,ACCOUNT_SID,SERVICE_SID}= process.env;
+const client = require('twilio')(ACCOUNT_SID,AUTH_TOKEN,{
+    lazyLoading:true
+})
+
+
+
 const signToken = (id) => {
 	return jwt.sign({ id }, process.env.JWT_SECRET, {
 		expiresIn: process.env.JWT_EXPIRES_IN,
 	});
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, verifiedResponse,res) => {
 	const token = signToken(user._id);
 	const cookieOptions = {
 		expires: new Date(
@@ -33,68 +40,81 @@ const createSendToken = (user, statusCode, res) => {
 		token,
 		data: {
 			user,
+			verifiedResponse
 		},
 	});
 };
 
-const emailRegex =
-	/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
 exports.signup = catchAsync(async (req, res, next) => {
-	const { firstName, lastName, email, role, phone, password, passwordConfirm } =
+	const { firstName, lastName,role, phone, password, passwordConfirm } =
 		req.body;
 	const platform = await Platform.findOne({ name: "platform" });
 
 	if (!platform) return next(new AppError("Platform not found", 404));
-	// Validate email format
-	if (!emailRegex.test(email)) {
-		return next(new AppError("Invalid email format", 400));
-	}
-
+	
 	// Validate password length
 	if (password.length < 8) {
 		return next(new AppError("Password must be at least 8 characters", 400));
 	}
-
+		 
 	// Create user
+	const otpResponse = await client.verify.services(SERVICE_SID).verifications.create({
+	   to:phone,
+	   channel:"sms"
+   });
+
+   if (!otpResponse) return next(new AppError("Otp not sent", 400))
 	const newUser = await User.create({
 		firstName,
 		lastName,
-		email,
 		role,
 		phone,
 		password,
 		passwordConfirm,
 	});
-	await sendEmail({
-		email: email,
-		subject: "Welcome to Our Website!",
-		message: `Hello ${firstName},\n\nWelcome to our app! We're glad you've joined us.\n\nBest,\nThe website Team`,
-	});
-
+	
 	if (req.body.role === "farmer") platform.totalFarmer += 1;
 	if (req.body.role === "customer") platform.totalCustomer += 1;
-	// Create and send JWT
-	createSendToken(newUser, 201, res);
+
+
+	res.status(200).send({
+		message:"success",
+		data: `OTP send successfully!: ${JSON.stringify(otpResponse)}`          
+	  });
 });
 
-exports.login = catchAsync(async (req, res, next) => {
-	const { email, password } = req.body;
+exports.verifySignUpOtp = catchAsync(async (req, res, next) => {
+	const { otp, phone } = req.body;
 
-	// 1) Check if email and password exist
-	if (!email || !password) {
-		return next(new AppError("Please provide email and password", 400));
+	const verifiedResponse = await client.verify.services(process.env.SERVICE_SID).verificationChecks.create({
+		to:phone,
+		code:otp,
+	});
+
+	const filter = { phone: phone };
+	const update = { active: true };
+	let user = await User.findOneAndUpdate(filter,update);
+
+	createSendToken(user, 200,verifiedResponse,res)
+})
+
+exports.login = catchAsync(async (req, res, next) => {
+	const { phone, password } = req.body;
+
+	// 1) Check if phone and password exist
+	if (!phone || !password) {
+		return next(new AppError("Please provide phone and password", 400));
 	}
 
 	// 2) Check if user exists && password is correct
-	const user = await User.findOne({ email }).select("+password");
+	const user = await User.findOne({ phone }).select("+password");
 
 	if (!user || !(await user.correctPassword(password, user.password))) {
-		return next(new AppError("Incorrect email or password", 401));
+		return next(new AppError("Incorrect phone number or password", 401));
 	}
 
 	// 3) If everything is ok, send token to client
-	createSendToken(user, 200, res);
+	createSendToken(user, 200, phone,res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -151,57 +171,44 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-	// 1) Get user based on POSTed email
-	const user = await User.findOne({ email: req.body.email });
+	// 1) Get user based on POSTed phone
+	const user = await User.findOne({ phone: req.body.phone });
 	if (!user) {
-		return next(new AppError("There is no user with email address.", 404));
+		return next(new AppError("There is no user with phone number.", 404));
 	}
 
 	// 2) Generate the random reset token
-	const resetToken = user.createPasswordResetToken();
-	await user.save({ validateBeforeSave: false });
+	const otpResponse = await client.verify.services(SERVICE_SID).verifications.create({
+		to:req.body.phone,
+		channel:"sms"
+	});
 
-	// 3) Send it to user's email
-	const resetURL = `${req.protocol}://${req.get(
-		"host"
-	)}/user/resetPassword/${resetToken}`;
-
-	const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}\nIf you didn't forget your password, please ignore this email!`;
-
-	try {
-		await sendEmail({
-			email: user.email,
-			subject: "Your password reset token (valid for 10 min)",
-			message,
-		});
-
-		res.status(200).json({
-			status: "success",
-			message: "Token sent to email!",
-		});
-	} catch (err) {
-		user.passwordResetToken = undefined;
-		user.passwordResetExpires = undefined;
-		await user.save({ validateBeforeSave: false });
-
-		return next(
-			new AppError("There was an error sending the email. Try again later!"),
-			500
-		);
-	}
+	res.status(200).send({
+		message:"success",
+		data: `OTP send successfully!: ${JSON.stringify(otpResponse)}`
+	})
 });
 
-exports.resetPassword = catchAsync(async (req, res, next) => {
-	// 1) Get user based on the token
-	const hashedToken = crypto
-		.createHash("sha256")
-		.update(req.params.token)
-		.digest("hex");
+exports.verifyResetOtp = catchAsync(async (req, res, next) => {
+	const { otp, phone } = req.body;
 
-	const user = await User.findOne({
-		passwordResetToken: hashedToken,
-		passwordResetExpires: { $gt: Date.now() },
+	const verifiedResponse = await client.verify.services(process.env.SERVICE_SID).verificationChecks.create({
+		to:phone,
+		code:otp,
 	});
+
+	const filter = { phone: phone };
+	const update = { active: true };
+	let user = await User.findOneAndUpdate(filter,update);
+	const doc = await User.findOne({ phone: phone });
+
+	createSendToken(doc, 200,verifiedResponse,res)
+})
+
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+	// 1) Get user based on the phon
+	const user = await User.findById(req.user._id);
 
 	// 2) If token has not expired, and there is user, set the new password
 	if (!user) {
@@ -214,13 +221,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 	user.password = req.body.password;
 	user.passwordConfirm = req.body.passwordConfirm;
-	user.passwordResetToken = undefined;
-	user.passwordResetExpires = undefined;
 	await user.save();
 
-	// 3) Update changedPasswordAt property for the user
-	// 4) Log the user in, send JWT
-	createSendToken(user, 200, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -235,12 +237,14 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 	if (req.body.password.length < 8) {
 		return next(new AppError("Password must be at least 8 characters", 400));
 	}
+	
 	// 3) If so, update password
 	user.password = req.body.password;
 	user.passwordConfirm = req.body.passwordConfirm;
+
 	await user.save();
 	// User.findByIdAndUpdate will NOT work as intended!
 
 	// 4) Log user in, send JWT
-	createSendToken(user, 200, res);
+	createSendToken(user, 200,user.phone, res);
 });
