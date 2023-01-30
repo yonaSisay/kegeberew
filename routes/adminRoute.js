@@ -36,4 +36,11 @@ router
 		authController.restrictTo("admin"),
 		adminController.getOneTransaction
 	);
+router
+	.route("/customers")
+	.get(
+		authController.protect,
+		authController.restrictTo("admin"),
+		adminController.getAllCustomers
+	);
 module.exports = router;

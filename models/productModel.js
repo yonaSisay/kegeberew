@@ -46,10 +46,6 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: [true,"a product must have price"],
     min: [0, 'price should be greater than or equal to 0']
-  },
-  active: {
-    type: Boolean,
-    default:true
   }
 },{timestamps:true});
 

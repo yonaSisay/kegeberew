@@ -98,12 +98,13 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
 	});
 });
 
-exports.getProduct = catchAsync(async (req, res, next) => {
-	const product = await Product.findById(req.params.id);
+exports.getAllCustomers = catchAsync(async (req, res, next) => {
+	const customers = await User.find({ role: "customer" });
 	res.status(200).json({
 		status: "success",
+		results: customers.length,
 		data: {
-			product,
+			customers,
 		},
 	});
 });
